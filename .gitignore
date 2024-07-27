@@ -1,0 +1,9 @@
+# Ignore virtual environment
+env/
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore plots directory
+src/plots/

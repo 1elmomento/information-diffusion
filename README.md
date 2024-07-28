@@ -31,10 +31,8 @@ How ICM works:
 
 I mentioned that $p(i, j)$ is the probability of node $j$ getting activated by node $i$. This probability is often defined as a weight associated with the edge connecting $i$ to $j$. I think this is not a good choice, because there is another more comprehensive and sophisticated measures for influence that can be used as the probability of a node getting activated. This measure is called **Eigenvector Centrality** and is usefull for assessing a node's influence on its neighbors. 
 
-In the `src/measures/measures.py` I defined a function for ICM. In this algorithm we compare a random number between 0 and 1 with the probablity of a node getting activated. In a general network in which the nodes are not friends, randomness can capture the random nature of spreading of the gossip in the social network. Gossip spreading in real life is not deterministic and a person can choose to spread the gossip based on various factors that can be modeled probabilistically. 
+In the `src/measures/measures.py`, I defined a function for ICM. In this algorithm I compare a random number between 0 and 1 with the probablity of a node getting activated. In a general network where the nodes are not friends, randomness can capture the random nature of spreading of the gossip in the social network. Gossip spreading in real life is not deterministic, and a person can choose to spread the gossip based on various factors that can be modeled probabilistically. 
 
-But in the social networks, nodes have a preference for spreading the gossip and the destination nodes. Meaning they will spread the gossip with nodes that they feel close. That is exactly why I will try to eliminate this randomness from my friendhip network. 
-
-For you to understand the network, this is my friendship network:
+In my case, where I study my friendship network, nodes have a preference for spreading the gossip and have favorate nodes as destination nodes. This means they will spread the gossip with nodes they feel close to. This is exactly why I will try to eliminate this randomness from my network of friends. In the image below you can see the network. 
 
 ![Friendship Netowrk](src/plots//network.png)

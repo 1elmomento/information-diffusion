@@ -29,7 +29,7 @@ How ICM works:
 
 4. *Termination*: The process continues until no further activations are possible, meaning all potential activations have been exhausted.
 
-I mentioned that $p(i, j)$ is the probability of node $j$ getting activated by node $i$. This probability is often defined as a weight associated with the edge connecting $i$ to $j$. I think this is not a good choice, because there is another more comprehensive and sophisticated measures for influence that can be used as the probability of a node getting activated. This measure is called **Eigen Vector Centrality** and is usefull for assessing a node's influence on its neighbors. 
+I mentioned that $p(i, j)$ is the probability of node $j$ getting activated by node $i$. This probability is often defined as a weight associated with the edge connecting $i$ to $j$. I think this is not a good choice, because there is another more comprehensive and sophisticated measures for influence that can be used as the probability of a node getting activated. This measure is called **Eigenvector Centrality** and is usefull for assessing a node's influence on its neighbors. 
 
 In the `src/measures/measures.py` I defined a function for ICM. In this algorithm we compare a random number between 0 and 1 with the probablity of a node getting activated. In a general network in which the nodes are not friends, randomness can capture the random nature of spreading of the gossip in the social network. Gossip spreading in real life is not deterministic and a person can choose to spread the gossip based on various factors that can be modeled probabilistically. 
 

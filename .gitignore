@@ -6,4 +6,3 @@ env/
 __pycache__/
 
 # Ignore plots directory
-src/plots/

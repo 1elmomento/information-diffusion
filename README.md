@@ -33,6 +33,6 @@ I mentioned that $p(i, j)$ is the probability of node $j$ getting activated by n
 
 In the `src/measures/measures.py`, I defined a function for ICM. In this algorithm I compare a random number between 0 and 1 with the probablity of a node getting activated. In a general network where the nodes are not friends, randomness can capture the random nature of spreading of the gossip in the social network. Gossip spreading in real life is not deterministic, and a person can choose to spread the gossip based on various factors that can be modeled probabilistically. 
 
-In my case, where I study my friendship network, nodes have a preference for spreading the gossip and have favorate nodes as destination nodes. This means they will spread the gossip with nodes they feel close to. This is exactly why I will try to eliminate this randomness from my network of friends. In the image below you can see the network. 
+In my case, where I study my friendship network, nodes have a preference for spreading the gossip and have favorate nodes as destination nodes. This means they will spread the gossip to nodes they feel close to. This is exactly why I will try to eliminate this randomness from my network of friends. In the image below you can see the network. 
 
 ![Friendship Netowrk](src/plots//network.png)

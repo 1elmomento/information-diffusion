@@ -31,7 +31,7 @@ class Models:
     create_network():
         Using defined nodes and edges in the parameters, this function creates a network and stores the file in `plots` folder.
 
-    degree_centrality_icm(seet_set):
+    degree_centrality_icm(seeds):
         This methods models the spread of information in the network and uses standard definition of the ICM and stores the infected and uninfected nodes in `plots/icm` folder.
 
     """
@@ -163,6 +163,26 @@ class Models:
         self.active_nodes = None
 
     def create_network(self) -> None:
+        """
+        Visualizes the graph by adding nodes and edges, and saves the visualization to a file.
+
+        This function adds nodes and edges to the graph, generates a layout for the graph visualization, and then draws the graph using Matplotlib. The generated plot is saved as a PNG file.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises:
+        OSError
+            If there is an issue saving the plot to the specified file path.
+        Exception:
+            For any other unexpected errors that may occur during the process.
+
+        """
         self.graph.add_nodes_from(self.nodes)
         self.graph.add_edges_from(self.edges)
 
@@ -177,50 +197,114 @@ class Models:
             edge_color="gray",
             node_color="#93BFCF",
         )
-        plt.savefig("plots/network.png", dpi=400)
-        plt.close("all")
 
-    def degree_centrality_icm(self, seed_set):
-        active = set(seed_set)
-        new_active = set(seed_set)
+        try:
+            plt.savefig("plots/network.png", dpi=400)
+        except OSError as ex:
+            print(f"File Save Error: {ex}")
+        except Exception as ex:
+            print(f"Unexpected Error: {ex}")
+        finally:
+            plt.close("all")
 
-        degree_centralities = nx.degree_centrality(self.graph)
+    def degree_centrality_icm(self, seeds):
+        """
+        Models the spread of the gossip using independent cascade model.
 
-        while new_active:
-            current_new_active = set()
-            for node in new_active:
-                for neighbor in self.graph.neighbors(node):
-                    if neighbor not in active and neighbor not in current_new_active:
-                        r = random.random()
-                        p = degree_centralities[node]
-                        if r < p:
-                            current_new_active.add(neighbor)
-            new_active = current_new_active
-            active.update(new_active)
+        This function uses independent cascade model for analyzing the spread of the gossip in the network. It uses degree centrality as the probability of a node getting activated by its active neighbors.
 
-        self.active_nodes = active
+        Parameters
+        ----------
+        seeds: list[int]
+            The initiator nodes. These nodes are active at first and spread the gossip in the network
 
-        node_colors = [
-            "red" if node in active else "skyblue" for node in self.graph.nodes()
-        ]
+        Returns
+        -------
+        None
 
-        plt.figure(figsize=(12, 8))
-        plt.title(f"Spread of Gossip initiating from {seed_set[0]} and {seed_set[1]}")
-        pos = nx.spring_layout(self.graph, k=0.5, iterations=200)
-        nx.draw(
-            self.graph,
-            pos,
-            with_labels=True,
-            node_size=600,
-            node_color=node_colors,
-            font_size=10,
-            font_color="black",
-            edge_color="gray",
-        )
-        plt.savefig(f"plots/icm/degree_{seed_set[0]}_{seed_set[1]}.spread.png", dpi=400)
-        print("Plot of ICM based on degree centrality is saved at plots/icm")
-        plt.close("all")
+        Raises
+        ------
+        OSError
+            If there is an issue saving the plot to the specified file path.
+        ValueError:
+            If seeds are not valid nodes in the network
+        nx.NetworkXError:
+            If there is an error related to graph operations
+        Exception:
+            For any other unexpected errors that may occur during the process.
+        """
 
-    def run(self, seed_set):
+        try:
+            active = set(seeds)
+            new_active = set(seeds)
+
+            degree_centralities = nx.degree_centrality(self.graph)
+
+            while new_active:
+                current_new_active = set()
+                for node in new_active:
+                    for neighbor in self.graph.neighbors(node):
+                        if (
+                            neighbor not in active
+                            and neighbor not in current_new_active
+                        ):
+                            r = random.random()
+                            p = degree_centralities[node]
+                            if r < p:
+                                current_new_active.add(neighbor)
+                new_active = current_new_active
+                active.update(new_active)
+
+            self.active_nodes = active
+
+            node_colors = [
+                "red" if node in active else "skyblue" for node in self.graph.nodes()
+            ]
+
+            plt.figure(figsize=(12, 8))
+            plt.title(f"Spread of Gossip initiating from {seeds[0]} and {seeds[1]}")
+            pos = nx.spring_layout(self.graph, k=0.5, iterations=200)
+            nx.draw(
+                self.graph,
+                pos,
+                with_labels=True,
+                node_size=600,
+                node_color=node_colors,
+                font_size=10,
+                font_color="black",
+                edge_color="gray",
+            )
+
+            try:
+                plt.savefig(
+                    f"plots/icm/degree_{seeds[0]}_{seeds[1]}.spread.png", dpi=400
+                )
+                print("Plot of ICM based on degree centrality is saved at plots/icm")
+            except OSError as ex:
+                print(f"File Save Error: {ex}")
+            except Exception as ex:
+                print(f"Unexpected Error: {ex}")
+            finally:
+                plt.close("all")
+
+        except ValueError as ex:
+            print(f"Value Error: {ex}")
+        except nx.NetworkXError as ex:
+            print(f"Graph Error: {ex}")
+        except Exception as ex:
+            print(f"Unexpceted Error: {ex}")
+
+    def run(self, seeds):
+        """
+        Executes the network creation and the degree centrality-based Independent Cascade Model (ICM) simulation.
+
+        This method first creates the network and then runs the simulation of the spread of gossip
+        based on degree centrality, using the provided seed nodes.
+
+        Parameters
+        ----------
+        seeds : list
+            A list of nodes from which the gossip spread simulation will initiate.
+        """
         self.create_network()
-        self.degree_centrality_icm(seed_set=seed_set)
+        self.degree_centrality_icm(seeds=seeds)

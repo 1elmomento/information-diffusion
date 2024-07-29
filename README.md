@@ -39,6 +39,6 @@ In my case, where I study my friendship network, nodes have a preference for spr
 
 
 ## Degree Centrality
-First I used degree centrality of the nodes as the probabiltiy of a node getting activated by the node who is already active. Let's have a look at a graph of activated nodes. In this run nodes that are initially active, were 12, and 18. I chose this nodes, because the destination node (18) has only one connection to to node 12 and does not have any connections with other nodes of the network. It is very unlikely that node 18 can spread the gossip as shown in this chart. The randomness does not model this case well:
+First I used degree centrality of the nodes as the probabiltiy of a node getting activated by the node who is already active. Let's have a look at a graph of activated nodes. In this run nodes that are initially active, were nodes 12 and 18. I chose this nodes because the destination node (18) has only one connection to to node 12 and does not have any connections to other nodes of the network. It is very unlikely that node 18 could spread the gossip as shown in this chart. The randomness does not model this case well:
 
 ![Activated Nodes](src/plots//icm/degree_12_18.spread.png)

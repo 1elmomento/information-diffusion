@@ -16,7 +16,7 @@ For modeling information diffusion in my network, first I use a simple model whi
 
 Information Diffusion in social networks referes to process by which information spreads from one node to anther nodes within the network. Studying information difussion and identifying the processes of it, is important because it can help us to understand how nodes are interacting with each other. This can be useful in the fields such marketing, public health, and social sciences.
 
-### Independent Cascade Mode
+### Independent Cascade Model
 
 This models is a simple probabalistic model used to simulate the spread of **influence** through the network. This method was introduced by Kemple et al. in 2003. It is specially useful in fields like epidemiology, viral marketing, and social netowrks. 
 
@@ -36,3 +36,9 @@ In the `src/measures/measures.py`, I defined a function for ICM. In this algorit
 In my case, where I study my friendship network, nodes have a preference for spreading the gossip and have favorate nodes as destination nodes. This means they will spread the gossip to nodes they feel close to. This is exactly why I will try to eliminate this randomness from my network of friends. In the image below you can see the network. 
 
 ![Friendship Netowrk](src/plots//network.png)
+
+
+## Degree Centrality
+First I used degree centrality of the nodes as the probabiltiy of a node getting activated by the node who is already active. Let's have a look at a graph of activated nodes. In this run nodes that are initially active, were 12, and 18. I chose this nodes, because the destination node (18) has only one connection to to node 12 and does not have any connections with other nodes of the network. It is very unlikely that node 18 can spread the gossip as shown in this chart. The randomness does not model this case well:
+
+![Activated Nodes](src/plots//icm/degree_12_18.spread.png)

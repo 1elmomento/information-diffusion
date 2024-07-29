@@ -1,13 +1,11 @@
-from measures.measures import Measures
+from diffusion.diffusion_models import Models
 
 
 def main():
-    measures = Measures()
+    models = Models()
 
-    seed_set = [12, 5]
-    prob = 0.5
-    spread = measures.run(seed_set=seed_set, prob=prob)
-    print(spread)
+    seed_set = [12, 27]
+    models.run(seed_set=seed_set)
 
 
 if __name__ == "__main__":

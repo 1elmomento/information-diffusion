@@ -6,7 +6,36 @@ import matplotlib.pyplot as plt
 matplotlib.use("QtAgg")
 
 
-class Measures:
+class Models:
+    """
+    Class of Models of Informatin Diffusion
+
+    This class contains models for information diffusion in the social network.
+
+    Attributes
+    ----------
+    nodes : list[int]
+        This is the list of numbered nodes of the network indication individuals.
+
+    edges: list[tuple[int, int]]
+        This is the list of all edges or connections between nodes of the network.
+
+    graph: nx.Graph
+        This is the Graph object created by the `networkx` package.
+
+    active_nodes: set
+        This is the set of nodes that are active in the process of information diffusion
+
+    Methods
+    -------
+    create_network():
+        Using defined nodes and edges in the parameters, this function creates a network and stores the file in `plots` folder.
+
+    degree_centrality_icm(seet_set):
+        This methods models the spread of information in the network and uses standard definition of the ICM and stores the infected and uninfected nodes in `plots/icm` folder.
+
+    """
+
     def __init__(self) -> None:
         self.nodes = list(range(1, 35))
         self.edges = [
@@ -131,6 +160,7 @@ class Measures:
             (28, 31),
         ]
         self.graph = nx.Graph()
+        self.active_nodes = None
 
     def create_network(self) -> None:
         self.graph.add_nodes_from(self.nodes)
@@ -150,23 +180,47 @@ class Measures:
         plt.savefig("plots/network.png", dpi=400)
         plt.close("all")
 
-    def independent_cascade_model(self, seed_set, prob):
+    def degree_centrality_icm(self, seed_set):
         active = set(seed_set)
         new_active = set(seed_set)
+
+        degree_centralities = nx.degree_centrality(self.graph)
 
         while new_active:
             current_new_active = set()
             for node in new_active:
                 for neighbor in self.graph.neighbors(node):
                     if neighbor not in active and neighbor not in current_new_active:
-                        if random.random() < prob:
+                        r = random.random()
+                        p = degree_centralities[node]
+                        if r < p:
                             current_new_active.add(neighbor)
             new_active = current_new_active
             active.update(new_active)
 
-        return active
+        self.active_nodes = active
 
-    def run(self, seed_set, prob):
+        node_colors = [
+            "red" if node in active else "skyblue" for node in self.graph.nodes()
+        ]
+
+        plt.figure(figsize=(12, 8))
+        plt.title(f"Spread of Gossip initiating from {seed_set[0]} and {seed_set[1]}")
+        pos = nx.spring_layout(self.graph, k=0.5, iterations=200)
+        nx.draw(
+            self.graph,
+            pos,
+            with_labels=True,
+            node_size=600,
+            node_color=node_colors,
+            font_size=10,
+            font_color="black",
+            edge_color="gray",
+        )
+        plt.savefig(f"plots/icm/degree_{seed_set[0]}_{seed_set[1]}.spread.png", dpi=400)
+        print("Plot of ICM based on degree centrality is saved at plots/icm")
+        plt.close("all")
+
+    def run(self, seed_set):
         self.create_network()
-        spread = self.independent_cascade_model(seed_set=seed_set, prob=prob)
-        return spread
+        self.degree_centrality_icm(seed_set=seed_set)

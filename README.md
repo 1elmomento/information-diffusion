@@ -50,13 +50,13 @@ This index takes into the account that the nodes sharing the most common neighbo
 The result of implementing this model on my network is depicted in the left graph below. The graph on the right shows the spreading of the gossip for same initial active nodes, but uses the simple version of the ICM. As you can see, in the left graph, fewer nodes got activated and nodes are mostly belongs to community of the second initial active node. I think this model can simulate the spread of the gossip more realistically than the previous method.
 
 <figure style="text-align: center;">
-  <img src="src/plots/cnim/spread_from_12_5.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
   <figcaption>Spread of gossip from 12 to 5, using the model I defined.</figcaption>
+  <img src="src/plots/cnim/spread_from_12_5.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
 </figure>
 
 
 <figure style="text-align: center;">
-  <img src="src/plots/icm/degree_12_5.spread.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
   <figcaption>Spread of gossip from 12 to 5, using the simple version of ICM.</figcaption>
+  <img src="src/plots/icm/degree_12_5.spread.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
 </figure>
   

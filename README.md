@@ -43,7 +43,7 @@ First I used degree centrality of the nodes as the probabiltiy of a node getting
 # Common Neighbors Influence Model:
 I defined a simple model that is based on Independent Cascade Model (ICM). In this model, I used degree centrality as node activation probability, as before. Instead of a random number, I defined an index called **common neighbors influence index** which denoted as `cn_index` in the code. We calculate this index as follows:
 
-$$\text{CN Index} = \fract{\text{Number of common neighbors of node i and j}}{Total number of neighbors of node j}$$
+$$\text{CN Index} = \frac{\text{Number of common neighbors of node i and j}}{Total number of neighbors of node j}$$
 
 This index takes into the account that the nodes sharing the most common neighbors are likely close to each other and, therefore they will chose themselves as destination nodes for gossip.
 

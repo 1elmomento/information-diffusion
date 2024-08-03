@@ -1,5 +1,7 @@
 import random
+import numpy as np
 import networkx as nx
+from networkx.algorithms import approximation as approx
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -159,6 +161,8 @@ class Models:
             (16, 28),
             (28, 31),
         ]
+        self.GREEN = "#20bf55"
+        self.GRAY = "#ced4da"
         self.graph = nx.Graph()
         self.active_nodes = None
 
@@ -294,7 +298,115 @@ class Models:
         except Exception as ex:
             print(f"Unexpceted Error: {ex}")
 
-    def run(self, seeds):
+    def common_neighbors_influence(self, seeds):
+        """
+        Function that models the spread of information in network based on degree centrality and common neighbors influence
+
+        Similar to ICM, this function models the spread of information in the network. Here as probability of a node getting activated I am using degree centrality. When common neighbor influence index for destination node is greater than this probability, the the node gets activated. The results gets saved at `plots/cnim/` folder.
+
+        Parameters
+        ----------
+        seeds: list[int]
+            Initial pair of nodes that are activated.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        OSError
+            If there is an issue saving the plot to the specified file path.
+        ValueError:
+            If seeds are not valid nodes in the network
+        nx.NetworkXError:
+            If there is an error related to graph operations
+        Exception:
+            For any other unexpected errors that may occur during the process.
+        """
+        try:
+            # Checking whether seeds are connected
+            if self.graph.has_edge(seeds[0], seeds[1]):
+                active_nodes = list(seeds)
+                centralities = nx.degree_centrality(self.graph)
+                new_active = set(seeds)
+                while new_active:
+                    current_node = active_nodes[-1]
+                    previous_node = active_nodes[0]
+
+                    common_neighbors = set(
+                        nx.common_neighbors(self.graph, previous_node, current_node)
+                    )
+
+                    neighbors = set(nx.neighbors(self.graph, current_node))
+
+                    cn_index = len(common_neighbors) / len(neighbors)
+
+                    neighbors_centralities = {
+                        k: centralities[k] for k in neighbors if k in centralities
+                    }
+
+                    # Removing nodes that are already active from centrality of neighbors' list.
+                    for key in active_nodes:
+                        if key in neighbors_centralities.keys():
+                            del neighbors_centralities[key]
+
+                    most_influenced = max(
+                        neighbors_centralities.items(),
+                        key=lambda x: x[1],
+                        default=(None, 0),
+                    )
+
+                    if most_influenced[0]:
+                        if cn_index > most_influenced[1]:
+                            active_nodes.append(most_influenced[0])
+                            new_active.add(most_influenced[0])
+                        else:
+                            new_active = set()
+
+                    else:
+                        new_active = set()
+
+                node_colors = [
+                    self.GREEN if node in active_nodes else self.GRAY
+                    for node in self.graph.nodes()
+                ]
+
+                plt.figure(figsize=(12, 8))
+                plt.title(f"Spread of Gossip initiating from {seeds[0]} and {seeds[1]}")
+                pos = nx.spring_layout(self.graph, k=0.5, iterations=200)
+                nx.draw(
+                    self.graph,
+                    pos,
+                    with_labels=True,
+                    node_size=600,
+                    node_color=node_colors,
+                    font_size=10,
+                    font_color="black",
+                    edge_color=self.GRAY,
+                )
+
+                try:
+                    plt.savefig(
+                        f"plots/cnim/spread_from_{seeds[0]}_{seeds[1]}.png",
+                        dpi=200,
+                    )
+                    plt.close("all")
+                except OSError as ex:
+                    print(f"Error saving file: {ex}")
+                except Exception as ex:
+                    print(f"Unexpected error: {ex}")
+                finally:
+                    plt.close("all")
+
+        except ValueError as ex:
+            print(f"Value Error: {ex}")
+        except nx.NetworkXError as ex:
+            print(f"Graph Error: {ex}")
+        except Exception as ex:
+            print(f"Unexpceted Error: {ex}")
+
+    def run_icm_models(self, seeds):
         """
         Executes the network creation and the degree centrality-based Independent Cascade Model (ICM) simulation.
 
@@ -307,4 +419,5 @@ class Models:
             A list of nodes from which the gossip spread simulation will initiate.
         """
         self.create_network()
-        self.degree_centrality_icm(seeds=seeds)
+        # self.degree_centrality_icm(seeds=seeds)
+        self.common_neighbors_influence(seeds=seeds)

@@ -332,7 +332,7 @@ class Models:
                 new_active = set(seeds)
                 while new_active:
                     current_node = active_nodes[-1]
-                    previous_node = active_nodes[0]
+                    previous_node = active_nodes[-2]
 
                     common_neighbors = set(
                         nx.common_neighbors(self.graph, previous_node, current_node)

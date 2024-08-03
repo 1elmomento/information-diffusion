@@ -54,6 +54,7 @@ The result of implementing this model on my network is depicted in the left grap
   <figcaption>Spread of gossip from 12 to 5, using the model I defined.</figcaption>
 </figure>
 
+
 <figure style="text-align: center;">
   <img src="src/plots/icm/degree_12_5.spread.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
   <figcaption>Spread of gossip from 12 to 5, using the simple version of ICM.</figcaption>

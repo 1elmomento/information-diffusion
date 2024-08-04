@@ -52,8 +52,8 @@ This method can model the spread of information in the network better than simpl
 Here is the the graph of active nodes. The left graph depict the spread of information when node 12 and 5 are initial active nodes, and the right graph shows the spread of information when node 12 and 18 are initial active nodes. In these cases my model seems to perform better:
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="src/plots/cnim/spread_from_12_5.png" alt="Spread of information in the network using common neighbor index" style="width: 50%; height: auto;">
-  <img src="src/plots/cnim/spread_from_12_18.png" alt="Spread of information in the network using common neighbor index" style="width: 50%; height: auto;">
+  <img src="src/plots/cnim/spread_from_12_5.png" alt="Spread of information in the network using common neighbor index" style="width: 48%; height: auto;">
+  <img src="src/plots/cnim/spread_from_12_18.png" alt="Spread of information in the network using common neighbor index" style="width: 48%; height: auto;">
 </div>
 
 

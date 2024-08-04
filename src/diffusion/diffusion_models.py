@@ -9,7 +9,7 @@ matplotlib.use("QtAgg")
 
 
 class Models:
-    """
+    r"""
     Class of Models of Informatin Diffusion
 
     This class contains models for information diffusion in the social network.
@@ -36,6 +36,11 @@ class Models:
     degree_centrality_icm(seeds):
         This methods models the spread of information in the network and uses standard definition of the ICM and stores the infected and uninfected nodes in `plots/icm` folder.
 
+    common_neighbors_influence(seeds):
+        This is a simple method based on ICM with minor modifications. In this methods we use degree centrality as the node activation probability, and an custom defined index for capability of node to activate other nodes. When this index is greater than the node activation probability, then the destination node gets activated.
+
+    run_icm_models(seeds):
+        This is a function for running all the methods. Aggergating all methods in one final method of the Class.
     """
 
     def __init__(self) -> None:
@@ -167,7 +172,7 @@ class Models:
         self.active_nodes = None
 
     def create_network(self) -> None:
-        """
+        r"""
         Visualizes the graph by adding nodes and edges, and saves the visualization to a file.
 
         This function adds nodes and edges to the graph, generates a layout for the graph visualization, and then draws the graph using Matplotlib. The generated plot is saved as a PNG file.
@@ -199,7 +204,7 @@ class Models:
             font_size=10,
             node_size=700,
             edge_color="gray",
-            node_color="#93BFCF",
+            node_color=self.GRAY,
         )
 
         try:
@@ -212,7 +217,7 @@ class Models:
             plt.close("all")
 
     def degree_centrality_icm(self, seeds):
-        """
+        r"""
         Models the spread of the gossip using independent cascade model.
 
         This function uses independent cascade model for analyzing the spread of the gossip in the network. It uses degree centrality as the probability of a node getting activated by its active neighbors.
@@ -262,11 +267,14 @@ class Models:
             self.active_nodes = active
 
             node_colors = [
-                "red" if node in active else "skyblue" for node in self.graph.nodes()
+                self.GREEN if node in active else self.GRAY
+                for node in self.graph.nodes()
             ]
 
             plt.figure(figsize=(12, 8))
-            plt.title(f"Spread of Gossip initiating from {seeds[0]} and {seeds[1]}")
+            plt.title(
+                f"Spread of Gossip initiating from {seeds[0]} and {seeds[1]} using ICM"
+            )
             pos = nx.spring_layout(self.graph, k=0.5, iterations=200)
             nx.draw(
                 self.graph,
@@ -276,12 +284,12 @@ class Models:
                 node_color=node_colors,
                 font_size=10,
                 font_color="black",
-                edge_color="gray",
+                edge_color=self.GRAY,
             )
 
             try:
                 plt.savefig(
-                    f"plots/icm/degree_{seeds[0]}_{seeds[1]}.spread.png", dpi=400
+                    f"plots/icm/degree_{seeds[0]}_{seeds[1]}.spread.png", dpi=200
                 )
                 print("Plot of ICM based on degree centrality is saved at plots/icm")
             except OSError as ex:
@@ -299,7 +307,7 @@ class Models:
             print(f"Unexpceted Error: {ex}")
 
     def common_neighbors_influence(self, seeds):
-        """
+        r"""
         Function that models the spread of information in network based on degree centrality and common neighbors influence
 
         Similar to ICM, this function models the spread of information in the network. Here as probability of a node getting activated I am using degree centrality. When common neighbor influence index for destination node is greater than this probability, the the node gets activated. The results gets saved at `plots/cnim/` folder.
@@ -406,8 +414,18 @@ class Models:
         except Exception as ex:
             print(f"Unexpceted Error: {ex}")
 
+    def eigenvector_spread_model(self, seeds):
+        if self.graph.has_edge(seeds[0], seeds[1]):
+            active_nodes = list(seeds)
+            new_active = set(seeds)
+            eigenvectors_c = nx.eigenvector_centrality(self.graph)
+
+            while new_active:
+                c_node = seeds[-1]
+                p_node = seeds[-2]
+
     def run_icm_models(self, seeds):
-        """
+        r"""
         Executes the network creation and the degree centrality-based Independent Cascade Model (ICM) simulation.
 
         This method first creates the network and then runs the simulation of the spread of gossip
@@ -421,3 +439,4 @@ class Models:
         self.create_network()
         # self.degree_centrality_icm(seeds=seeds)
         self.common_neighbors_influence(seeds=seeds)
+        # self.eigenvector_spread_model(seeds=seeds)

@@ -1,62 +1,63 @@
-# Friendship Network and Information diffusion
+# Friendship Network and Information Diffusion
+I used social network analysis and graph theory to analyze my friends’ network. In that project I used common social network analysis measures for identifying key nodes in the network, detecting communities and finally analyzing effect of node removal on entire network.
+In this project, I explore standard information diffusion models and also models that I defined to see how information flows in my network. I specifically model the diffusion of “gossip”.  
+For simplicity, the edges between nodes are undirected and unweighted. 
 
-This project is a subsequent of another project in which I analyzed my friends network using Social Network Analysis and Graph theory. I've read a paper about spread of gossip in society and I decided to model the spread of the gossip and in general information diffusion in my network of friends.
+This is my network and you can find the nodes and edges in the `Models` class. 
 
-### About this projcet
+![Network](src/plots/network.png)
 
-For modeling information diffusion in my network, first I use a simple version of a model called **Independent Cascade Model (ICM)**. In this implementaion there were two numbers being compared. One is a random number between 0 and 1, and the other is the probability of a node getting activated. 
+## The Models: 
 
-## Information Diffusion 
+Since at the end I will try to model spread of the gossip, it is useful to have a definition of it here:
+#### :memo: What is gossip:
+Gossip is defined as information passed between two individuals $A$ and $B$ about a third individual $C$ which effects the strengths of all three relationships: it strengthens $\text{A-B}$ and weakens both $\text{B-C}$ and $\text{A-C}$ [1].
+In models defined in `src/diffusion/diffusion_models.py` I don’t specifically analyze the effect of gossip on the strength of the edges between nodes, but only how information flows in the network based on some criteria. 
 
-Information Diffusion in social networks referes to process by which information spreads from one node to anther nodes within the network. Studying information difussion and identifying the processes of it, is important because it can help us to understand how nodes are interacting with each other. This can be useful in the fields such marketing, public health, and social sciences.
+Here are the models:
 
-### Independent Cascade Model
+### 1. Independent Cascade Model:
+The independent cascade model is an information diffusion model where the information flows over the network through cascade. Nodes can have two states, active: it means the node is already influenced by the information in diffusion, inactive: node is unaware of the information or not influenced [2]. 
 
-This models is a simple probabalistic model used to simulate the spread of **influence** through the network. This method was introduced by Kemple et al. in 2003. It is specially useful in fields like epidemiology, viral marketing, and social netowrks. 
+In a simple version of this model, I compared two numbers with each other. One is the probability of a node getting activated and second is a random number between 0 and 1. Instead of node activation probability I used **degree centrality** of the node as a threshold for a node getting activated. Whenever the random number is less than the activation threshold of a node, then that node will get activated. 
 
-How ICM works:
-1. *Initial Activation*: The process of modeling starts with a set of nodes that are initially activated. Activation here means two or more nodes are engaged in spreading the information. Since I am studying spread of gossip on my network, I will use gossip instead of information from now on. For example in my modeling in the `src` folder, I defined nodes 12 and 5 to be initially activated. 
+This method incorporate randomness of spreading of information in social networks. However, in real world networks and specifically in networks in which node has meaningful relations like “friendship” randomness does not model the spread of the information properly. 
 
-2. *Activation Process*: When a node $i$ becomes active, it has a single oppurtunity to activate all its inactive neighbors. For instance, if active node $i$ had two inactive neighbors $j$, $k$, it will attempt to activate those two nodes. Meaning, it will try to spread the gossip to these two nodes. In some models the categorize the nodes in three classes of Initiator, Ignorant, and Infected. The Ignorant nodes are inactive and do not participate in spreading the gossip, which means they are not influenced by the influnce of their active neighbors. Here the probability of activation makes sense, because not all the nodes have the same role in social networks.
-
-3. *Sequential Attempts*: If node $i$ successfully activates node $j$ and node $k$, each of these new activated (or infected) nodes will try to activate their own neighbors. It is important to note, regardless of the result of activation one node only can attempt once to activate other nodes.
-
-4. *Termination*: The process continues until no further activations are possible, meaning all potential activations have been exhausted.
-
-We denote the probability of node $j$ getting activated by node $i$ as $p(i, j)$. This probability is often defined as a weight associated with the edge connecting $i$ to $j$. I think this is not a good choice, because there are other comprehensive and sophisticated measures for influence that can be used as the probability of a node getting activated. One measure that can be used in this regard is called **Eigenvector Centrality** and it is usefull for assessing a node's influence on its neighbors.
-
-In the `src/measures/measures.py`, I defined a function for ICM. In this algorithm I compare a random number between 0 and 1 with the probablity of a node getting activated. In a general network where the nodes are not friends, randomness can capture the random nature of spreading of the gossip in the social network. Gossip spreading in real life is not deterministic, and a person can choose to spread the gossip based on various factors that can be modeled probabilistically. 
-
-In my case, where I study my friendship network, nodes have a preference for spreading the gossip and have favorate nodes as destination nodes. This means they will spread the gossip to nodes they feel close to. This is why I try to model the spread of the gossip in the network without comparing a random number with node activation probability.
-
-### The Network:
-![Friendship Netowrk](src/plots//network.png)
-
-## Results of implementing simple version of ICM:
-
-First I used degree centrality of the nodes as the probabiltiy of a node getting activated by the node who is already active. Let's have a look at a graph of activated nodes. In this run nodes that are initially active, were nodes 12 and 18. I chose this nodes because the destination node (18) has only one connection to to node 12 and does not have any connections to other nodes of the network. It is very unlikely that node 18 could spread the gossip as shown in this chart. The randomness does not model this case well:
-
-**Consideration**: The network is undirected and the algorithm assumes node 12 will spread the gossip to other nodes than 18 as well. This is not what I assume, and I will change the code in a way, in which nodes can only activate one node.
+#### :warning: Issues of this method:
+In this modeling, initiator nodes were 12 and 18. I chose these nodes because node 18 only has one connection in the network and that’s the edge 12-18. Since I assume that node 12 will participate in spreading the information only once, then spreading information from node 12 to other nodes in the network is not acceptable. Node 12 only activates node 18, and then node 18 must continue the activation of other nodes and since it does not have any other connections, spread of information in the network must stop at node 18. The result of spreading information in the network initiating from node 12 and 18 is as follows:
 
 ![Activated Nodes](src/plots//icm/degree_12_18.spread.png)
 
-# Common Neighbors Influence Model:
-I defined a simple model that is based on Independent Cascade Model (ICM). In this model, I used degree centrality as node activation probability, as before. Instead of a random number, I defined an index called **common neighbors influence index** which denoted as `cn_index` in the code. We calculate this index as follows:
+Node 12 must be removed from further participation in spreading the information, and even though we apply this restriction we still have another problem. The random number will be sometimes greater than node 18’s degree centrality and sometimes less. This means in every run we may get different results. 
+
+To overcome this issue I defined the following methods:
+
+### 2. Common Neighbors Influence
+
+As before in this method, I use degree centrality as a threshold of a node getting activated. But instead of using a random number to see which node gets activated, I use an index that I defined as follows:
 
 $$\text{CN Index} = \frac{\text{Number of common neighbors of node i and j}}{\text{Total number of neighbors of node j}}$$
 
-This index takes into the account that the nodes sharing the most common neighbors are likely close to each other and, therefore they will chose themselves as destination nodes for gossip.
+This index is called Common Neighbors Index. To define it I assumed that when a node gets information from other nodes, particularly, when this information can be considered as gossip, the activation of that node (which means participation in spreading of it) is related to the importance or influence of the sender node. Therefore, when sender and the receiver has more common neighbors, we can assume these are part of a community in the network and thus it is more likely that these two nodes will share the information with each other. The index is also between 0 and 1 and you can find the implementation of this model in `common_neighbors_influence` method of `Models` class. 
 
-The result of implementing this model on my network is depicted in the left graph below. The graph on the right shows the spreading of the gossip for same initial active nodes, but uses the simple version of the ICM. As you can see, in the left graph, fewer nodes got activated and nodes are mostly belongs to community of the second initial active node. I think this model can simulate the spread of the gossip more realistically than the previous method.
+When a node gets activated, it gets removed from the further spread of the information, and new active nodes try to activated other nodes as much as they can. 
 
-<figure style="text-align: center;">
-  <figcaption>Spread of gossip from 12 to 5, using the model I defined.</figcaption>
-  <img src="src/plots/cnim/spread_from_12_5.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
-</figure>
+When `cn_index` is greater that degree centrality of the destination node, the the destination node will be activated. The reason is that `cn_index` is a measure of the importance or influence of the sender node, and when the influence of a node is greater than the centrality of the receiver node, we can assume that receiver node is under influence of the sender node, and thus receiver will be activated. 
+For example, consider the same nodes 12 and 18 in my network. These two nodes are initially active. Node 18 attempts to spread the information to other nodes in the network, and since this node is only connected to node 12, and the node 12 is already active, the process of spreading the information stops at node 18. 
+Now consider another node in the network. Using social network analysis’ measures we know that node 5 is one the most important node in the network. Every centrality measure for this node has a high values. In the simple ICM model, there is no distinction between node 18 and node 5 when it comes to spreading information. But in this model, all the nodes that are in the community of node 5, get activated.
+
+#### :warning: Issues of this method:
+This method can model the spread of information in the network better than simple version of ICM. In the case of node 5, when its the second active node, model can simulate the spread of information as I expect. But when another important node, such as 27, starts the spreading the information, node 5 get activated as third node. Here I expect node 5 to spread the information as before, the process gets stopped at this level and we end having only three active nodes, 12, 27, and 5. The reason for this is the adjacency of node 12. When node 5 becomes third active node, in the process of calculating the `cn_index` it loses some of its connections from first node, and therefore the index becomes smaller and thus it cannot activated the forth node. I think it is logical, but I also believe this should happen. 
+
+Here is the the graph of active nodes. The left graph depict the spread of information when node 12 and 5 are initial active nodes, and the right graph shows the spread of information when node 12 and 18 are initial active nodes. In these cases my model seems to perform better:
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="src/plots/cnim/spread_from_12_5.png" alt="Spread of information in the network using common neighbor index" style="width: 50%; height: auto;">
+  <img src="src/plots/cnim/spread_from_12_18.png" alt="Spread of information in the network using common neighbor index" style="width: 50%; height: auto;">
+</div>
 
 
-<figure style="text-align: center;">
-  <figcaption>Spread of gossip from 12 to 5, using the simple version of ICM.</figcaption>
-  <img src="src/plots/icm/degree_12_5.spread.png" alt="Activated Nodes" style="max-width: 100%; height: auto;">
-</figure>
-  
+### Resources:
+1. [The Effect of Gossip on Social Networks](https://wiki.santafe.edu/images/4/4a/Gossip.pdf).
+2. [Influence Maximization in the Independent Cascade Model](https://ceur-ws.org/Vol-1720/short9.pdf)
+

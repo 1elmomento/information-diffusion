@@ -1,4 +1,5 @@
 import random
+import math
 import numpy as np
 import networkx as nx
 from networkx.algorithms import approximation as approx
@@ -43,133 +44,12 @@ class Models:
         This is a function for running all the methods. Aggergating all methods in one final method of the Class.
     """
 
-    def __init__(self) -> None:
-        self.nodes = list(range(1, 35))
-        self.edges = [
-            (12, 5),
-            (12, 27),
-            (12, 9),
-            (12, 33),
-            (12, 1),
-            (12, 18),
-            (12, 21),
-            (12, 14),
-            (12, 30),
-            (12, 3),
-            (12, 22),
-            (12, 7),
-            (12, 25),
-            (12, 34),
-            (12, 2),
-            (12, 19),
-            (12, 11),
-            (12, 29),
-            (12, 6),
-            (12, 15),
-            (12, 20),
-            (12, 4),
-            (12, 13),
-            (12, 32),
-            (12, 8),
-            (23, 28),
-            (12, 10),
-            (5, 27),
-            (5, 9),
-            (5, 33),
-            (5, 1),
-            (5, 21),
-            (5, 14),
-            (5, 30),
-            (5, 3),
-            (5, 22),
-            (5, 7),
-            (5, 25),
-            (5, 34),
-            (5, 29),
-            (5, 6),
-            (5, 15),
-            (5, 4),
-            (5, 13),
-            (5, 31),
-            (5, 24),
-            (5, 17),
-            (5, 26),
-            (27, 9),
-            (27, 33),
-            (27, 1),
-            (27, 34),
-            (27, 29),
-            (27, 6),
-            (27, 4),
-            (27, 13),
-            (27, 23),
-            (9, 33),
-            (9, 1),
-            (9, 30),
-            (9, 34),
-            (9, 6),
-            (9, 4),
-            (9, 24),
-            (9, 23),
-            (33, 1),
-            (33, 34),
-            (33, 6),
-            (33, 23),
-            (1, 30),
-            (1, 3),
-            (1, 34),
-            (1, 29),
-            (1, 6),
-            (1, 4),
-            (1, 24),
-            (21, 14),
-            (21, 25),
-            (21, 29),
-            (21, 13),
-            (14, 29),
-            (14, 25),
-            (14, 13),
-            (30, 34),
-            (30, 6),
-            (30, 4),
-            (30, 31),
-            (30, 17),
-            (3, 34),
-            (3, 29),
-            (3, 6),
-            (3, 31),
-            (3, 17),
-            (25, 29),
-            (25, 28),
-            (25, 10),
-            (25, 16),
-            (34, 6),
-            (34, 15),
-            (34, 4),
-            (34, 31),
-            (34, 17),
-            (19, 11),
-            (29, 6),
-            (29, 15),
-            (29, 20),
-            (29, 13),
-            (29, 28),
-            (29, 26),
-            (6, 15),
-            (6, 4),
-            (6, 31),
-            (6, 24),
-            (6, 17),
-            (4, 31),
-            (4, 17),
-            (32, 8),
-            (16, 28),
-            (28, 31),
-        ]
+    def __init__(self, nodes, edges) -> None:
+        self.nodes = nodes
+        self.edges = edges
         self.GREEN = "#20bf55"
         self.GRAY = "#ced4da"
         self.graph = nx.Graph()
-        self.active_nodes = None
 
     def create_network(self) -> None:
         r"""
@@ -263,8 +143,6 @@ class Models:
                                 current_new_active.add(neighbor)
                 new_active = current_new_active
                 active.update(new_active)
-
-            self.active_nodes = active
 
             node_colors = [
                 self.GREEN if node in active else self.GRAY
@@ -414,15 +292,112 @@ class Models:
         except Exception as ex:
             print(f"Unexpceted Error: {ex}")
 
-    def eigenvector_spread_model(self, seeds):
-        if self.graph.has_edge(seeds[0], seeds[1]):
+    def potential_diffusion_model(self, seeds, epsilon=0.1):
+        r"""
+        Function the simulate information diffusion based on Activation and Spreader Potential of receiver and spreader node.
+
+        Parameters
+        ----------
+        seeds: list[int]
+            Initial node that is active.
+
+        epsilon: float
+            damping coefficient for controling rate of decay of spread
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        OSError
+            If there is an issue saving the plot to the specified file path.
+        ValueError:
+            If seeds are not valid nodes in the network
+        nx.NetworkXError:
+            If there is an error related to graph operations
+        Exception:
+            For any other unexpected errors that may occur during the process.
+        """
+
+        try:
             active_nodes = list(seeds)
             new_active = set(seeds)
-            eigenvectors_c = nx.eigenvector_centrality(self.graph)
+            eigenvector_centraltiy = nx.eigenvector_centrality(self.graph)
+            closeness_centrality = nx.closeness_centrality(self.graph)
+            betweenness_centraltiy = nx.betweenness_centrality(self.graph)
+            degree_centrality = nx.degree_centrality(self.graph)
+            clustering = nx.clustering(self.graph)
 
             while new_active:
-                c_node = seeds[-1]
-                p_node = seeds[-2]
+                for index, spreader in enumerate(active_nodes):
+                    for node in self.graph.nodes():
+                        if node not in active_nodes:
+                            if self.graph.has_edge(spreader, node):
+
+                                sp = (
+                                    (
+                                        degree_centrality[spreader]
+                                        + betweenness_centraltiy[spreader]
+                                        + closeness_centrality[spreader]
+                                        + eigenvector_centraltiy[spreader]
+                                    )
+                                    / 4
+                                    * (np.exp(-epsilon * index))
+                                )
+
+                                ap = clustering[node]
+
+                                if sp > ap:
+                                    print(f"({spreader}, {node}) - [{sp}, {ap}]")
+                                    new_active.add(node)
+                                    active_nodes.append(node)
+                                else:
+                                    new_active = set()
+                            else:
+                                new_active = set()
+                        else:
+                            new_active = set()
+
+            print(active_nodes)
+
+            node_colors = [
+                self.GREEN if node in active_nodes else self.GRAY
+                for node in self.graph.nodes()
+            ]
+
+            plt.figure(figsize=(12, 8))
+            plt.title(f"Spread of Gossip initiating from {seeds[0]} using ERI")
+            pos = nx.spring_layout(self.graph, k=0.5, iterations=200)
+            nx.draw(
+                self.graph,
+                pos,
+                with_labels=True,
+                node_size=600,
+                node_color=node_colors,
+                font_size=10,
+                font_color="black",
+                edge_color=self.GRAY,
+            )
+
+            try:
+                plt.savefig(
+                    f"plots/potential/potential_diffusion_{seeds[0]}.png", dpi=200
+                )
+                print("Plot of ICM based on degree centrality is saved at plots/icm")
+            except OSError as ex:
+                print(f"File Save Error: {ex}")
+            except Exception as ex:
+                print(f"Unexpected Error: {ex}")
+            finally:
+                plt.close("all")
+
+        except ValueError as ex:
+            print(f"Value Error: {ex}")
+        except nx.NetworkXError as ex:
+            print(f"Graph Error: {ex}")
+        except Exception as ex:
+            print(f"Unexpceted Error: {ex}")
 
     def run_icm_models(self, seeds):
         r"""
@@ -438,5 +413,9 @@ class Models:
         """
         self.create_network()
         # self.degree_centrality_icm(seeds=seeds)
-        self.common_neighbors_influence(seeds=seeds)
-        # self.eigenvector_spread_model(seeds=seeds)
+        # self.common_neighbors_influence(seeds=seeds)
+        self.eigenvector_spread_model(seeds=seeds)
+
+    def run_eigenvector_spread(self, seeds, epsilon):
+        self.create_network()
+        self.potential_diffusion_model(seeds=seeds, epsilon=epsilon)
